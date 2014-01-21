@@ -8,7 +8,7 @@ function check_is_email (email) {
 function create_user_princ(uname) {
     var u = Meteor.user();
     if (u && u._wrap_privkey && current_pw) {
-	var keys = sjcl.decrypt(current_pw, u._wrap_privkey);
+	var keys = Principal.unwrap(current_pw, u._wrap_privkey, uname);
 	Principal.set_current_user_keys(keys, uname);
     }  
 }
