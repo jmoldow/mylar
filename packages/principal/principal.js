@@ -564,18 +564,18 @@ generate_princ_keys = function(cb) {
     // returns true if it has all secret keys
     // throws exception if it only has a subset of the secret keys
     Principal.prototype._has_secret_keys = function() {
-	var self = this;
-	if (!self.keys) {
-	    return false;
-	}
-	if (self.keys.decrypt && self.keys.sign &&
-	    (!use_search() || self.keys.mk_key) && self.keys.sym_key) {
-	    return true;
-	}
-	if (self.keys.decrypt || self.keys.sign || (use_search() && self.keys.mk_key) || self.keys.sym_key) {
-	    throw new Error("principal " + princ.id + " type " + princ.type + " has partial secret keys" );
-	}
-	return false;
+        var self = this;
+        if (!self.keys) {
+            return false;
+        }
+        if (self.keys.decrypt && self.keys.sign &&
+            (!use_search() || self.keys.mk_key) && self.keys.sym_key) {
+            return true;
+        }
+        if (self.keys.decrypt || self.keys.sign || (use_search() && self.keys.mk_key) || self.keys.sym_key) {
+            throw new Error("principal " + self.id + " type " + self.type + " has partial secret keys" );
+        }
+        return false;
     }
     // loads secret keys for the principal self.id
     // by finding a chain to the current user and decrypts the secret keys
