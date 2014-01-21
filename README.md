@@ -52,6 +52,8 @@ You should navigate to enc_modules/crypto_fire and follow the README there in or
 In addition, there is a binary that works on some systems in the enc_modules/crypto_fire/Binaries/ folder, which you should copy to:
 $(HOME)/.mozilla/plugins/, creating the plugins folder if necessary.
 
+The plugin has been tested to work on 32 and 64-bit distributions of Linux and on Mac OS X.
+
 2. add the search package to the application
 EncChat$ /path/to/mylar add search
 
