@@ -381,6 +381,35 @@ if (Meteor.isClient) {
 	return new Principal(type, name, deserialize_keys(keys));
     }
 
+    function wrap_message(princ) {
+	return JSON.stringify({
+	    msg : 'wrapkeys',
+	    name : princ.name,
+	    keys : serialize_keys(princ.keys)
+	});
+    }
+    // returns a string which is the wrapped principal princ
+    // under the password 
+    Principal.wrap = function(password, princ) {
+	return sjcl.encrypt(password, wrap_message(princ));
+    }
+
+    // returns serialized keys of the principal wrapped in wrap
+    // with password
+    Principal.unwrap = function(password, wrap, uname) {
+	var unwrapped = JSON.parse(sjcl.decrypt(password, wrap));
+	if (unwrapped.msg != "wrapkeys") {
+	    throw new Error("invalid wrapped key");
+	}
+	if (unwrapped.name != uname) {
+	    throw new Error("uname in unwrapped key does not match");
+	}
+
+	return unwrapped.keys;
+	
+    }
+
+    
 
 
 // generates keys: standard crypto + multi-key

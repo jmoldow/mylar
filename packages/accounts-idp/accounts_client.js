@@ -46,7 +46,7 @@ Accounts.createUser = function (options, callback) {
 	    
 	    options = _.clone(options);
 	    options._princ_name = uname;
-	    options.wrap_privkeys = sjcl.encrypt(password, ukeys);
+	    options.wrap_privkeys = Principal.wrap(password, uprinc);
 	    options.public_keys = serialize_public(uprinc.keys);
 
 	    createUserOrig(options, function(err) {
