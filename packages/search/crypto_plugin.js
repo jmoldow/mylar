@@ -87,6 +87,8 @@ MylarCrypto.keygen = function(cb) {
     var enc_fire_e = enc_fire();
     if (enc_fire_e && enc_fire_e.valid)
         cb(enc_fire_e.Keygen());
+    else if(typeof EncApp != 'undefined')
+	EncApp.keygen();
     else
         enc_module.postMessage("keygen()");
 };
@@ -103,6 +105,8 @@ MylarCrypto.delta = function(k1, k2, cb) {
     var enc_fire_e = enc_fire();
     if(enc_fire_e && enc_fire_e.valid)
         cb(enc_fire_e.Delta(k1, k2));
+    else if(typeof EncApp != 'undefined')
+	EncApp.delta(k1, k2);
     else
         enc_module.postMessage("delta(" + k1 + "," + k2 + ")");
 };
@@ -119,6 +123,8 @@ MylarCrypto.token = function(k, word, cb) {
     var enc_fire_e = enc_fire();
     if(enc_fire_e && enc_fire_e.valid)
         cb(enc_fire_e.Token(k, word));
+    else if(typeof EncApp != 'undefined')
+	EncApp.token(k, word);
     else
         enc_module.postMessage("token(" + k + "," + word + ")");
 };
@@ -135,6 +141,8 @@ MylarCrypto.encrypt = function(k, word, cb) {
     var enc_fire_e = enc_fire();
     if (enc_fire_e && enc_fire_e.valid)
         cb(enc_fire_e.Encrypt(k, word));
+    else if(typeof EncApp != 'undefined')
+	EncApp.encrypt(k, word);
     else
         enc_module.postMessage("encrypt(" +  k + "," + word + ")");
 };
@@ -152,6 +160,8 @@ MylarCrypto.index_enc = function(k, word, cb) {
     var enc_fire_e = enc_fire();
     if (enc_fire_e && enc_fire_e.valid) {
 	cb(enc_fire_e.IndexEnc(k, word));
+    } else if(typeof EncApp != 'undefined') {
+	EncApp.index_enc(k, word);
     } else {
 	enc_module.postMessage("index_enc(" +  k + "," + word + ")");
     }
@@ -262,6 +272,8 @@ MylarCrypto.match = function(tok, cipher, cb) {
     var enc_fire_e = enc_fire();
     if (enc_fire_e && enc_fire_e.valid)
         cb(enc_fire_e.Match(tok, cipher));
+    else if(typeof EncApp != 'undefined')
+	EncApp.match(tok, cipher);
     else
         enc_module.postMessage("match(" + tok + "," + cipher + ")");
 };
