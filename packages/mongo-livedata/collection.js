@@ -154,7 +154,7 @@ Meteor.Collection = function (name, options) {
 	    
           return;
         } else if (msg.msg === 'added') {
-	      intercept_in(self, mongoId, msg.fields, function() {
+	    intercept_in(self, mongoId, msg.fields, function() {
                   if (doc) {
                       throw new Error("Expected not to find a document already present for an add");
                   }
@@ -169,7 +169,24 @@ Meteor.Collection = function (name, options) {
           if (!doc)
             throw new Error("Expected to find a document to change");
           if (!_.isEmpty(msg.fields)) {
-            var modifier = {};
+	      console.log("changed " + JSON.stringify(msg.fields));
+
+	      var newdoc = _.extend(doc, {}); //clone the object
+	      
+              _.each(msg.fields, function (value, key) {
+		  if (value === undefined) {
+		      delete newdoc[key];
+		  } else {
+		      newdoc[key] = value;
+		  }
+              });
+	      intercept_in(self, mongoId, newdoc, function() {
+                  self._collection.update(mongoId, newdoc);
+              });
+
+/*
+
+            var modifier = {};	      
             _.each(msg.fields, function (value, key) {
               if (value === undefined) {
                 if (!modifier.$unset)
@@ -181,9 +198,10 @@ Meteor.Collection = function (name, options) {
                 modifier.$set[key] = value;
               }
             });
-	      intercept_in(self, mongoId, modifier.$set, function() {
-                  self._collection.update(mongoId, modifier);
-              });
+	      update_doc(doc, modifier);
+	      intercept_in(self, mongoId, doc, function() {
+                  self._collection.replace(mongoId, doc);
+              });*/
           }
         } else {
           throw new Error("I don't know how to deal with this message");
