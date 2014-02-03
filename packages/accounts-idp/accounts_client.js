@@ -35,12 +35,15 @@ Accounts.createUser = function (options, callback) {
     }
     
     var password = options.password;
+    if (typeof password != 'string'){
+	throw new Error("password input to Accounts.createUser must be string");
+    }
     current_pw = password;
 
     Principal.create('user', uname, null, function (uprinc) {
 	createPrincipalCB(uprinc, function () {
 	    var ukeys = serialize_keys(uprinc.keys);
-
+	    
 	    if (!options.suppressLogin)
 		Principal.set_current_user_keys(ukeys, uname);
 	    
@@ -48,7 +51,7 @@ Accounts.createUser = function (options, callback) {
 	    options._princ_name = uname;
 	    options.wrap_privkeys = Principal.wrap(password, uprinc);
 	    options.public_keys = serialize_public(uprinc.keys);
-
+	    
 	    createUserOrig(options, function(err) {
 		callback(err, uprinc);
 	    });
