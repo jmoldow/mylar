@@ -602,7 +602,8 @@ generate_princ_keys = function(cb) {
             return true;
         }
         if (self.keys.decrypt || self.keys.sign || (use_search() && self.keys.mk_key) || self.keys.sym_key) {
-            throw new Error("principal " + self.id + " type " + self.type + " has partial secret keys" );
+          throw new Error("principal " + self.id + " type " + self.type
+			  + " has partial secret keys" + serialize_keys(self.keys));
         }
         return false;
     }

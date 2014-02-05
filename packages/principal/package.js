@@ -21,4 +21,5 @@ Package.on_use(function (api) {
     api.export("search_field_name");
     api.export("WrappedKeys");
     api.export("active_attacker");
+  api.export("generate_princ_keys");
 });
