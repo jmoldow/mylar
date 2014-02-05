@@ -48,7 +48,7 @@ Meteor.Collection.prototype.search = function(pubname, wordmap, princ, filter_ar
     if (dbprinc.accessInbox.length > 0) {
 	_processAccessInbox(princ, dbprinc);
     }
-    
+
     var mapkeys = _.keys(wordmap);
     
     if (_.keys(wordmap).length != 1) {
@@ -63,6 +63,7 @@ Meteor.Collection.prototype.search = function(pubname, wordmap, princ, filter_ar
 
     MylarCrypto.token(princ.keys.mk_key, word.toLowerCase(), function(token){
 	var search_info = {};
+
 	search_info["args"] = filter_args;
 	search_info["princ"] = princ.id;
 	search_info["enc_princ"] = self._enc_fields[field].princ;
@@ -77,7 +78,7 @@ Meteor.Collection.prototype.search = function(pubname, wordmap, princ, filter_ar
 
 	if (search_debug)
 	    console.log("word " + word + " token " + token);
-	
+
 	search_cb = callback;
 	search_collec = self;
 	Session.set("_search_info", search_info);
@@ -100,12 +101,14 @@ Deps.autorun(function(){
 			 function(){ // on ready handle
 			     console.log("ready handle");
 			     var self = this;
+			     Session.set("search_tag", tag);
+			
 			     var cb = search_cb;
 			     if (cb) {
-				 Session.set("search_tag", tag);
 				 cb(search_collec.find({_tag: tag}));
 			     }
 			 });
+    } else {
     }
 });
 }
@@ -136,7 +139,6 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 
     Meteor.publish(sub_name(self_col._name, pubname),
       function(args, token, tag, enc_princ, princ, field, has_index){
-	  console.log("searching for " + tag);
           if (search_debug)
 	      console.log("\n\n START SEARCH \n\n enc_princ " + enc_princ);
 	  
@@ -164,7 +166,6 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 		//console.log("each");
 		var handle = self_col.find(filter).observe({
 		    added: function(doc) {
-			//console.log("added");
 			var princid = doc[enc_princ];
 			var adjusted = adj_toks[princid];
 
@@ -176,7 +177,6 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 			    // first check if it matches
 			    var wk = WrappedKeys.findOne({principal: princid,
 							  wrapped_for: princ});
-			    //console.log("adj A");
 			    if (!wk) {
 				throw new Error("no wrapped key");
 			    }
@@ -184,10 +184,7 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 				throw new Error("missing delta");
 			    }
 			
-			    //console.log("adj B");
-			    //console.log("token is " + token + " delta " + wk.delta);
 			    adjusted = crypto_server.adjust(token, wk.delta);
-			    //console.log("adj C");
 			    adj_toks[princid] = adjusted;
 
 			}
@@ -196,7 +193,6 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 			var rand = doc[rand_f];
 			adjusted = base_crypto.mkhash(rand, adjusted);
 
-			//console.log("adjusted");
 			if (search_debug)
 			    console.log("adjusted " + adjusted + " has index " + has_index);
 			
@@ -219,22 +215,25 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 					   
 			    }
 			} else {
-			    //console.log("no index");
-			    var enctext = doc[search_f];
-			    if (search_debug) console.log("enctext " + JSON.stringify(enctext));
-			    _.some(enctext, function(encword, index){
-				if (adjusted == encword) {
-				    if (search_debug) {console.log("FOUND\n");}
-				    var docproj = getProj(doc, proj, tag);
-				    //var docproj = getProj(self_col.findOne({_id: doc._id}), proj, token);
-				    if (search_debug)
-					console.log("\n\n docproj is " + JSON.stringify(docproj));
-				    self.added(self_col._name, doc._id, docproj);
-				    found = true;
-				    console.log("matched " + JSON.stringify(enctext));
-				    return true;
-				}
-			    });
+			  //console.log("no index");
+			  var enctext = doc[search_f];
+			  if (!enctext) {
+			    console.log("there is no search enc field; is the field SEARCHABLE?");
+			  }
+			  if (search_debug) console.log("enctext " + JSON.stringify(enctext));
+			  _.some(enctext, function(encword, index){
+			    if (adjusted == encword) {
+			      if (search_debug) {console.log("FOUND\n");}
+			      var docproj = getProj(doc, proj, tag);
+			      //var docproj = getProj(self_col.findOne({_id: doc._id}), proj, token);
+			      if (search_debug)
+				console.log("\n\n docproj is " + JSON.stringify(docproj));
+			      self.added(self_col._name, doc._id, docproj);
+			      found = true;
+			      console.log("matched " + JSON.stringify(enctext));
+			      return true;
+			    }
+			  });
 			}
 		    }
 		});
