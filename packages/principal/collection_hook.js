@@ -126,20 +126,22 @@ _dec_fields = function(_enc_fields, _signed_fields, id, container, fields, callb
 		      if (debug) console.log("dec f; f is " + f);
 
 		      if (dec_princ) {
-			  var auth_data = get_adata(_enc_fields, f, _.extend(container, {_id: id}));
-			  var res  = JSON.parse(dec_princ.sym_decrypt(
-			      container[enc_field_name(f)], auth_data));
-			  if (ENC_DEBUG) {
-			      if (JSON.stringify(res) != JSON.stringify(container[f])) {
-				  throw new Error ("inconsistency in the value decrypted and plaintext");
-			      }
-			  } else {
-			      container[f] = res;
-			      if (debug) console.log("setting f to " + res);
+			var auth_data = get_adata(_enc_fields, f, _.extend(container, {_id: id}));
+			var enc_name = enc_field_name(f);
+			var res  = JSON.parse(dec_princ.sym_decrypt(
+			  container[enc_name], auth_data));
+			if (ENC_DEBUG) {
+			  if (JSON.stringify(res) != JSON.stringify(container[f])) {
+			    throw new Error ("inconsistency in the value decrypted and plaintext");
 			  }
-			  //todo: searchable consistency check
+			} else {
+			  container[f] = res;
+			  if (debug) console.log("setting f to " + res);
+			}
+			delete container[enc_name];
+			//todo: searchable consistency check
 		      } else {
-			   console.log("no dec princ");
+			console.log("no dec princ");
 		      }
 		      cb();
 		  });	
