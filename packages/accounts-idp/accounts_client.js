@@ -5,11 +5,9 @@ function check_is_email (email) {
 
 function create_user_princ(uname, password) {
     var u = Meteor.user();
-    console.log("create _user princ");
     if (u) {
 	if (u._wrap_privkey && password) {
 	    var keys = Principal.unwrap(password, u._wrap_privkey, uname);
-	    console.log("setting current keys ");
 	    Principal.set_current_user_keys(keys, uname);
 	} else {
 	    throw new Error("user does not have wrapped private keys in local collection");
@@ -62,7 +60,6 @@ Accounts.createUser = function (options, callback) {
       options.wrap_privkeys = Principal.wrap(password, uprinc);
       options.public_keys = serialize_public(uprinc.keys);
 
-	console.log("createing new user with options " + JSON.stringify(options));
       createUserOrig(options, function(err) {
 	callback(err, uprinc);
       });

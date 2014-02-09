@@ -26,7 +26,7 @@
      token: the actual cryptographic token
 */
 
-var debug = false;
+var debug = true;
 var crypto = base_crypto;
 
 
@@ -354,13 +354,13 @@ if (Meteor.isClient) {
 	    throw new Error("cannot create principal with invalid (type, name) "
 			    + type + ", " + name);
 	}
-
+	
 	var p = new Principal(type, name, deserialize_keys(keys));
 	
 	if (!p._has_secret_keys()) {
 	    throw new Error("cannot create static principal without its public keys");
 	}
-
+	
 	cache_add(p);
 	
 	var pt = PrincType.findOne({type: type, name:name});
@@ -368,9 +368,13 @@ if (Meteor.isClient) {
 	    PrincType.insert({type:type, name:name});
 	    Principal._store(p, null, true);
 	}
-
-	Principal.add_access(creator, p,
-			     function(){cb && cb(p);});
+	
+	if (creator) {
+	    Principal.add_access(creator, p,
+				 function(){cb && cb(p);});
+	}
+	
+	return p;
     }
     
     /*
