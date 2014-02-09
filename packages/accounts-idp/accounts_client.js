@@ -1,5 +1,3 @@
-var current_pw = null;
-
 function check_is_email (email) {
     
     return email && email.indexOf('@') != -1;
@@ -9,8 +7,8 @@ function create_user_princ(uname, password) {
     var u = Meteor.user();
     console.log("create _user princ");
     if (u) {
-	if (u._wrap_privkey && current_pw) {
-	    var keys = Principal.unwrap(current_pw, u._wrap_privkey, uname);
+	if (u._wrap_privkey && password) {
+	    var keys = Principal.unwrap(password, u._wrap_privkey, uname);
 	    console.log("setting current keys ");
 	    Principal.set_current_user_keys(keys, uname);
 	} else {
@@ -47,7 +45,6 @@ Accounts.createUser = function (options, callback) {
   if (typeof password != 'string'){
     throw new Error("password input to Accounts.createUser must be string");
   }
-  current_pw = password;
   
   var auth = options.auth_princ;
   if (options.auth_princ)
@@ -115,7 +112,6 @@ var loginWithPasswordOrig = Meteor.loginWithPassword;
    selector must be either an email address
    or an object with an email field.*/
 Meteor.loginWithPassword = function (selector, password, cb) {
-    current_pw = password;
 
     if (!selector) {
 	throw new Error("must specify selector");
