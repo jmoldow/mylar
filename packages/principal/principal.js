@@ -788,7 +788,9 @@ generate_princ_keys = function(cb) {
     /*
      Takes as input a list of PrincAttrs, and the username of a user -- authority
      and outputs a principal for attrs[0].
-     The principal does not have secret keys loaded. 
+     The principal does not have secret keys loaded.
+     Authority is either a string representing the name of a user,
+     or an object representing a principal.
     */
     Principal.lookup = function (attrs, authority, on_complete) {
 
@@ -805,8 +807,20 @@ generate_princ_keys = function(cb) {
 	
 	if (debug)
 	    console.log("Principal.lookup: " + authority + " attrs[0]: " + attrs[0].type + "=" + attrs[0].name);
+
+
+	var lookupAuthority = function(authority, cb) {
+	    if (typeof authority == "string") {
+		Principal.lookupUser(authority, cb);
+	    } else {
+		if (!authority.id)
+		    throw new Error("authority in lookup must be principal or string ");
+		cb(authority);
+	    }
+	}
+
 	
-	Principal.lookupUser(authority, function (auth_princ) {
+	lookupAuthority(authority, function (auth_princ) {
 	    if (!auth_princ) {
 		throw new Error("idp did not find user " + authority);
 	    }
