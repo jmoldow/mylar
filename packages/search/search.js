@@ -365,7 +365,7 @@ Meteor.Collection.prototype.publish_single_search_filter = function(pubname, fil
 
 if (Meteor.isClient) {
        
-    
+ /*   
 Meteor.Collection.prototype.single_search = function(pubname, wordmap, princ, filter_args, callback) {
     var self = this;
     
@@ -428,7 +428,71 @@ Meteor.Collection.prototype.single_search = function(pubname, wordmap, princ, fi
     
    
  }
+*/
 
+    
+Meteor.Collection.prototype.single_search = function(pubname, wordmap, princ, filter_args, callback) {
+    var self = this;
+
+    if (!Submissions) {
+	alert("single search is just for submit");
+    }
+    
+    var mapkeys = _.keys(wordmap);
+    
+    if (_.keys(wordmap).length != 1) {
+	throw new Error("must specify one word");
+    }
+    var field = mapkeys[0];
+    var word = wordmap[field];
+    
+    if (!word || word == "") {
+	return;
+    }
+
+    // need to lookup these room princs
+    var princs = {};
+
+    var callback2 = _.after(Meteor.users.length, function(){
+
+	var search_info = {};
+	search_info["args"] = filter_args;
+	search_info["princ"] = "x";
+	search_info["enc_princ"] = self._enc_fields[field].princ;
+	var tokens = JSON.stringify(princs);
+	search_info["token"] = tokens;
+	search_info["tag"] = base_crypto.mkhash(tokens);
+	search_info["field"] = field;
+        search_info["pubname"] = pubname;
+	search_info["has_index"] = is_indexable(self._enc_fields, field);
+
+	if (search_debug)
+	    console.log("word " + word + " tokens " + tokens);
+	
+	search_cb = callback;
+	search_collec = self;
+	Session.set("_search_info", search_info);
+
+    });
+
+    Meteor.users.find().forEach(function(doc){
+	console.log("user profile is " + JSON.stringify(doc));
+	Principal._lookupByID(doc._pk, // assuming staff princ has cached validations of pk, name
+//	Principal.lookup([new PrincAttr("user", doc.emails[0].address)],  ,
+			 function(princ) {
+			     if (!princ._has_secret_keys()) {
+				 throw new Error("princ does not have secret keys");
+			     }
+			     MylarCrypto.index_enc(princ.keys.mk_key, word, function(token){
+				 princs[princ.id] = token;
+				 callback2();
+			     });
+			 });
+    });
+
+    
+   
+ }
 
 
 }

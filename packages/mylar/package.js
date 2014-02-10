@@ -6,7 +6,8 @@ Package.on_use(function (api) {
 
     var where = ['client', 'server'];
 
-    api.imply(['principal', 'accounts-idp']);
-
+    api.use(['principal', 'accounts-idp'], where);
+    api.imply(['principal', 'accounts-idp'], where);
+    api.add_files(['mylar.js'], where);
     api.export('USE_MYLAR');
 });
