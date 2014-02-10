@@ -118,7 +118,12 @@ wrapped_keys = function() {
     return res;
 }
 
+// takes as input a principal or a string
 pretty = function(princ) {
+
+    if (typeof princ == "string") {
+	return princ;
+    }
     var res = "";
     
     if (!princ) {
@@ -259,6 +264,8 @@ if (Meteor.isServer) {
                         subject_name: princattr.name,
 			signer : princid
                     }).fetch();
+		    console.log("looking for name " + princattr.name + " signed by " + princid);
+		    console.log("found " + cs.length);
 		    // add each certificate to new_princs
                     _.each(cs, function (cert) {
 			var new_lst = cert_lst.slice(0);
@@ -791,24 +798,25 @@ generate_princ_keys = function(cb) {
      The principal does not have secret keys loaded.
      Authority is either a string representing the name of a user,
      or an object representing a principal.
+     TODO: needs cleanup, authority should always be principal, IDP or static
     */
     Principal.lookup = function (attrs, authority, on_complete) {
 
 	startTime("lookup");
 
-	var p = cache_get_certif(attrs, authority);
-	if (p) {
-	    endTime("lookup");
-	    on_complete(p);
-	    return;
-	} else {
-	    if (debug) console.log("MISS");
+	if (typeof authority == "string") {
+	    var p = cache_get_certif(attrs, authority);
+	    if (p) {
+		endTime("lookup");
+		on_complete(p);
+		return;
+	    } else {
+		if (debug) console.log("MISS");
+	    }
 	}
-	
-	if (debug)
-	    console.log("Principal.lookup: " + authority + " attrs[0]: " + attrs[0].type + "=" + attrs[0].name);
 
-
+	// looks up the principal corresponding to authority
+	// and calls cb with it
 	var lookupAuthority = function(authority, cb) {
 	    if (typeof authority == "string") {
 		Principal.lookupUser(authority, cb);
@@ -820,20 +828,27 @@ generate_princ_keys = function(cb) {
 	}
 
 	
+	if (debug)
+	    console.log("Principal.lookup: " + pretty(authority) + " attrs[0]: " + attrs[0].type + "=" + attrs[0].name);
+
+
+	
 	lookupAuthority(authority, function (auth_princ) {
 	    if (!auth_princ) {
-		throw new Error("idp did not find user " + authority);
+		throw new Error("idp did not find user for " + pretty(authority));
 	    }
 	    var auth_id =  auth_princ.id;
 
 	    Meteor.call("lookup", attrs, auth_id, function (err, result) {
 	
                 if (err || !result) {
-                    throw new Error("Principal lookup fails");
+                    throw new Error("Principal lookup fails for authority " + pretty(authority));
                 }
 	
                 var princ = result.principal;
                 var certs = result["cert"];
+
+		
 		
 	        var cert_attrs = _.zip(certs, attrs);
 	        var princ_keys = deserialize_keys(princ);
@@ -866,7 +881,8 @@ generate_princ_keys = function(cb) {
 			if (debug) console.log("chain verifies");
 			princ = new Principal(attrs[0].type, attrs[0].name, princ_keys);
 			princ._load_secret_keys(function(){
-			    cache_add(princ, {'uname': authority});
+			    if (typeof authority == "string") //TODO: this cache must check it is for users, else insecure
+				cache_add(princ, {'uname': authority});
 			    endTime("lookup");
 			    on_complete && on_complete(princ);   
 			}, true);
