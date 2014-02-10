@@ -94,13 +94,15 @@ Deps.autorun(function(){
 	var token = search_info.token;
 	var tag = search_info.tag;
 
-	Meteor.subscribe(sub_name(search_collec._name, search_info["pubname"]),
+	var subname = sub_name(search_collec._name, search_info["pubname"]);
+	
+	Meteor.subscribe(subname,
 			 search_info["args"], token, tag,
 			 search_info["enc_princ"], search_info["princ"],
 			 search_info["field"], search_info["has_index"],
 			 function(){ // on ready handle
-			     console.log("ready handle");
 			     var self = this;
+
 			     Session.set("search_tag", tag);
 			
 			     var cb = search_cb;
@@ -215,7 +217,7 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 					   
 			    }
 			} else {
-			  //console.log("no index");
+			    if (search_debug) console.log("no index");
 			  var enctext = doc[search_f];
 			  if (!enctext) {
 			    console.log("there is no search enc field; is the field SEARCHABLE?");
@@ -263,7 +265,10 @@ Meteor.Collection.prototype.publish_single_search_filter = function(pubname, fil
 	
     var self_col = this;
 
-    Meteor.publish(sub_name(self_col._name, pubname),
+
+    var subname = sub_name(self_col._name, pubname);
+
+    Meteor.publish(subname,
       function(args, token, tag, enc_princ, princ, field, has_index){
 
         if (search_debug)
@@ -272,7 +277,7 @@ Meteor.Collection.prototype.publish_single_search_filter = function(pubname, fil
         var self = this;
 
 	var found = false;
-	  
+
 	if (token != null) {
 
 	    // unstrigify tokens
@@ -303,7 +308,7 @@ Meteor.Collection.prototype.publish_single_search_filter = function(pubname, fil
 
 			var rand = doc[rand_f];
 			adjusted = base_crypto.mkhash(rand, adjusted);
-
+			
 			if (search_debug)
 			    console.log("adjusted " + adjusted + " has index " + has_index);
 			
@@ -453,8 +458,9 @@ Meteor.Collection.prototype.single_search = function(pubname, wordmap, princ, fi
     // need to lookup these room princs
     var princs = {};
 
-    var callback2 = _.after(Meteor.users.length, function(){
+    var userscount = Meteor.users.find({}).count();
 
+    var callback2 = _.after(userscount, function(){
 	var search_info = {};
 	search_info["args"] = filter_args;
 	search_info["princ"] = "x";
@@ -476,7 +482,6 @@ Meteor.Collection.prototype.single_search = function(pubname, wordmap, princ, fi
     });
 
     Meteor.users.find().forEach(function(doc){
-	console.log("user profile is " + JSON.stringify(doc));
 	Principal._lookupByID(doc._pk, // assuming staff princ has cached validations of pk, name
 //	Principal.lookup([new PrincAttr("user", doc.emails[0].address)],  ,
 			 function(princ) {
