@@ -169,8 +169,6 @@ Meteor.Collection = function (name, options) {
           if (!doc)
             throw new Error("Expected to find a document to change");
           if (!_.isEmpty(msg.fields)) {
-	      console.log("changed " + JSON.stringify(msg.fields));
-
 	      var newdoc = _.extend(doc, {}); //clone the object
 	      
               _.each(msg.fields, function (value, key) {
