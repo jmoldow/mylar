@@ -53,7 +53,7 @@ FB::variant CryptoExtAPI::IndexEnc(const FB::variant& k1, const FB::variant& wor
 
 FB::variant CryptoExtAPI::ParEnc(const FB::variant& k1, const FB::variant& par)
 {
-	return bmk.index_enc(k1.cast<std::string>(), par.cast<std::string>());
+	return bmk.par_enc(k1.cast<std::string>(), par.cast<std::string>());
 }
 
 FB::variant CryptoExtAPI::Adjust(const FB::variant& tok, const FB::variant& delta)
