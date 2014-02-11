@@ -17,7 +17,7 @@ Package.on_use(function (api, where) {
 
     api.export("MylarCrypto");
     api.export("MYLAR_USE_SEARCH");
-        
+    api.export("enc_fire");
     if(USE_NACL){
       // What a hack!  Extract source_root via the exception string.
       var source_root;
