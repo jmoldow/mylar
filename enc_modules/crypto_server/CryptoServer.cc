@@ -96,6 +96,12 @@ index_enc(b64mk & mk, const map<string, string> & args) {
 
 
 static string
+par_enc(b64mk & mk, const map<string, string> & args) {
+    return mk.par_enc(get_assert(args, "k"),
+		      get_assert(args, "par"));
+}
+
+static string
 adjust(b64mk & mk, const map<string, string> & args) {
     return mk.adjust(get_assert(args, "tok"),
 		     get_assert(args, "delta"));
@@ -162,6 +168,9 @@ CryptoServer::process(const string & request) {
 	}
 	else if (action == "index_enc") {
 	    resp << index_enc(mk, args);
+	}
+	else if (action == "par_enc") {
+	    resp << par_enc(mk, args);
 	}
 	else if (action == "adjust") {
 	    resp << adjust(mk, args);

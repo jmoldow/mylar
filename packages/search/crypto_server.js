@@ -39,6 +39,12 @@ if (Meteor.isServer) { // server is synchronous
 		return send_request(url_ext);
 	    },
 
+	    par_enc : function(k, par) {
+		var url_ext = 'index_enc?k=' + k + '&par=' + par;
+		return send_request(url_ext);
+	    },
+
+
 	    token : function(k, word) {
 		var url_ext = 'token?k=' + k + '&word=' + word;
 		return send_request(url_ext);
@@ -119,6 +125,11 @@ if (Meteor.isClient) { // client must be asynchronous
 	    
 	    index_enc : function(k, word, cb) {
 		var url_ext = 'index_enc?k=' + k + '&word=' + word;
+		send_request(url_ext, cb);
+	    },
+	    
+	    par_enc : function(k, par, cb) {
+		var url_ext = 'index_enc?k=' + k + '&par=' + par;
 		send_request(url_ext, cb);
 	    },
 
