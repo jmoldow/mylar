@@ -185,6 +185,8 @@ var tokenize_for_search = function(text) {
     return res;
 }
 
+// encrypts a text
+// calls cb on random value and ciphertext - a list
 MylarCrypto.text_encrypt = function(k, ptext, cb) {
     setup_crypto();
 
@@ -205,6 +207,49 @@ MylarCrypto.text_encrypt = function(k, ptext, cb) {
 	    callback();
 	});
     });    
+}
+
+// calls cb with a string that contains
+// b64 enc strings separated by space
+function par_enc(k, ptext, cb) {
+    enc_return = cb;
+    if (USE_CRYPTO_SERVER) {
+	crypto_server.par_enc(k, ptext, cb);
+	return;
+    }
+    
+    var enc_fire_e = enc_fire();
+    if (enc_fire_e && enc_fire_e.valid)
+        cb(enc_fire_e.ParEnc(k, ptext));
+    else
+	throw new Error("paragraph encryption only supported by crypto server and encfire");
+}
+
+// encrypts a text
+// same as text_encrypt, but faster because it sends all text to
+// the low-level crypto directly
+// calls cb on random value and ciphertext
+MylarCrypto.paragraph_encrypt = function(k, ptext, cb) {
+    setup_crypto();
+
+    var r = sjcl.codec.hex.fromBits(sjcl.random.randomWords(2));
+    
+    var callback = function(ciph) {
+	// ciph should be a string formed of b64 encoded
+	// strings split by space
+	var ciph_list = tokenize_for_search(ciph);
+
+	var enc_items = [];
+
+	// hash with randomness
+	_.each(ciph_list, function(encitem, index){
+	    encitems[index] = base_crypto.mkhash(r, encitem); 
+	});
+
+	cb(r, encitems);
+    }
+
+    par_enc(k, ptext, callback);
 }
 
 

@@ -141,6 +141,45 @@ test_b64MK() {
 }
 
 static void
+testParEnc() {
+    cerr << "testing paragraph encryption ... ";
+    
+    list<string> words = {"alice", "chris", "eve", "ina", "dana", "iana", "cana", "fana", "iana", "dora"};
+
+    string paragraph = "";
+
+    string delims = " .+;,'";
+
+    uint index = 0;
+    for (auto word: words) {
+	char c = delims.at(index % delims.length());
+	paragraph = paragraph + c + word;
+	index++;
+    }
+    
+    cerr << "paragraph is " << paragraph <<"\n";
+    
+    b64mk mk;
+    string k = mk.keygen();
+    string kk = mk.keygen();
+
+    string par_enc = mk.par_enc(kk, paragraph);
+
+    cerr << "par enc is " << par_enc <<"\n";
+    
+    string delta = mk.delta(k, kk);
+
+    for (auto word : words) {
+	string enc_word = mk.adjust(mk.token(k, word), delta);
+	assert_s(par_enc.find(enc_word) != std::string::npos, "paragraph enc is not right");
+    }
+    assert_s(par_enc.find("alice") == std::string::npos, "found plaintext");
+
+    cout << "OK\n";
+ 
+}
+
+static void
 test() {
     test_MK();
     test_b64MK();
@@ -318,6 +357,8 @@ bench_b64(int ac, char **av) {
 int
 main(int ac, char **av)
 {
+
+    testParEnc();
     bool benchf = true;
     if (!benchf) test();
     if (benchf) bench_b64(ac, av);

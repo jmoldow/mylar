@@ -105,6 +105,44 @@ b64mk::index_enc(const std::string & k, const std::string & word) {
     return marshall(mk.index_enc(unmarshall_scalar(mk, k), word));
 }
 
+static std::list<std::string>
+split(const std::string &s, const std::string & separators) {
+    
+    std::list<std::string> parts = std::list<std::string>();
+
+    std::string word = "";
+    for (auto c : s) {
+	if (separators.find(c) != std::string::npos) {
+	    if (word.length() > 0) {
+		parts.push_back(word);
+	    }
+	    word = "";
+	} else {
+	    word = word + c;
+	}
+    }
+
+    if (word.length() > 0) {
+	parts.push_back(word);
+    }
+    return parts;
+}
+
+
+std::string
+b64mk::par_enc(const std::string &k, const std::string & ptext) {
+    //tokenize ptext
+    auto lst = split(ptext, " +=!.,;'");
+
+    string res = "";
+    // call index_enc on each
+    for (auto word : lst) {
+	res = res + index_enc(k, word)+ ' ';
+    }
+
+    return res;    
+}
+
 std::string
 b64mk::adjust(const std::string & tok, const std::string & delta) {
     return marshall(mk.adjust(unmarshall_tok(mk, tok),
