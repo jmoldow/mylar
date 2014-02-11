@@ -407,7 +407,7 @@ function encrypt_row(_enc_fields, _signed_fields, container, callback) {
 			      
 			      if (debug) console.log("is searchable");
 			      //var time1 = window.performance.now();
-			      MylarCrypto.text_encrypt(enc_princ.keys.mk_key,
+			      MylarCrypto.paragraph_encrypt(enc_princ.keys.mk_key,
 						       container[f],
 						       function(rand, ciph) {
 							   container[search_field_name(f)] = ciph;

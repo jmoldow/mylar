@@ -27,6 +27,7 @@ parse_args(string argstr, map<string, string> & args) {
       eq = argstr.find("=", amp);
 
       args[key] = value;
+      cerr << "for key " << key << " value " << value << "\n";
   }
 }
 
@@ -98,7 +99,7 @@ index_enc(b64mk & mk, const map<string, string> & args) {
 static string
 par_enc(b64mk & mk, const map<string, string> & args) {
     return mk.par_enc(get_assert(args, "k"),
-		      get_assert(args, "par"));
+		      base64_decode(get_assert(args, "par")));
 }
 
 static string

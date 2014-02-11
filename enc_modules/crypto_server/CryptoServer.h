@@ -11,7 +11,7 @@
  * delta k1 k2              -> delta
  * encrypt k word           -> ciph
  * index_enc k word         -> ciph
- * par_enc k par            -> ciph
+ * par_enc k par            -> ciph  // par is base 64 encoded when received
  * token k word             -> tok
  * adjust tok delta         -> searchtok
  * match searchtok ciph     -> boolean

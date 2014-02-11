@@ -185,6 +185,7 @@ var tokenize_for_search = function(text) {
     return res;
 }
 
+
 // encrypts a text
 // calls cb on random value and ciphertext - a list
 MylarCrypto.text_encrypt = function(k, ptext, cb) {
@@ -225,6 +226,19 @@ function par_enc(k, ptext, cb) {
 	throw new Error("paragraph encryption only supported by crypto server and encfire");
 }
 
+function split_by_space(str) {
+    var str_list = str.split(" ");
+
+    var new_list = [];
+    for (i = 0; i < str_list.length; i++) {
+	if (str_list[i] && str_list[i].length > 0) {
+	    new_list.push(str_list[i]);
+	}
+    }
+
+    return new_list;
+}
+
 // encrypts a text
 // same as text_encrypt, but faster because it sends all text to
 // the low-level crypto directly
@@ -237,9 +251,10 @@ MylarCrypto.paragraph_encrypt = function(k, ptext, cb) {
     var callback = function(ciph) {
 	// ciph should be a string formed of b64 encoded
 	// strings split by space
-	var ciph_list = tokenize_for_search(ciph);
-
-	var enc_items = [];
+	console.log("this is ciph " + ciph);
+	var ciph_list = split_by_space(ciph);
+	console.log("After splitting by space " + JSON.stringify(ciph_list));
+	var encitems = [];
 
 	// hash with randomness
 	_.each(ciph_list, function(encitem, index){

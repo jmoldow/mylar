@@ -131,6 +131,8 @@ split(const std::string &s, const std::string & separators) {
 
 std::string
 b64mk::par_enc(const std::string &k, const std::string & ptext) {
+
+    cerr << "par_enc receives ptext " << ptext;
     //tokenize ptext
     auto lst = split(ptext, " +=!.,;'");
 
