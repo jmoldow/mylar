@@ -25,7 +25,7 @@ MYLAR_USE_SEARCH = true;
 search_cb = undefined;
 search_collec = undefined;
 
-const search_debug = true;
+const search_debug = false;
 
 var sub_name = function(coll, pub) {
     return coll+"++"+pub;
@@ -103,7 +103,12 @@ Deps.autorun(function(){
 			 search_info["field"], search_info["has_index"],
 			 function(){ // on ready handle
 			     var self = this;
-			     console.log("ready");
+			     //console.log("ready");
+                  if(window.performance != undefined){
+                     document.READY_TIME = window.performance.now()
+                  } else {
+                      document.READY_TIME = new Date().getTime(); 
+                  }
 			     Session.set("search_tag", tag);
 			
 			     var cb = search_cb;
@@ -143,7 +148,7 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
     Meteor.publish(sub_name(self_col._name, pubname),
       function(args, token, tag, enc_princ, princ, field, has_index){
           if (search_debug)
-	      console.log("\n\n START SEARCH \n\n enc_princ " + enc_princ);
+	        console.log("\n\n START SEARCH \n\n enc_princ " + enc_princ);
 	  
 	  var self = this;
 	  
@@ -275,7 +280,7 @@ Meteor.Collection.prototype.publish_single_search_filter = function(pubname, fil
       function(args, token, tag, enc_princ, princ, field, has_index){
 
         if (search_debug)
-	    console.log("\n\n START SEARCH \n\n enc_princ " + enc_princ);
+            console.log("\n\n START SEARCH \n\n enc_princ " + enc_princ);
 	  
         var self = this;
 

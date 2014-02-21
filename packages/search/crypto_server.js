@@ -89,7 +89,8 @@ if (Meteor.isClient) { // client must be asynchronous
 	
 	// calls cb on the content of the response
 	function send_request(url_extension, cb) {
-
+        console.log("url for debug: " + base_url+url_extension);
+        document.debug_url = base_url + url_extension;
 	    Meteor.http.call("GET", base_url+url_extension, {}, function(error, res){
 		if (!error && res && res.statusCode == 200) {
 		    cb(res.content);
@@ -129,6 +130,9 @@ if (Meteor.isClient) { // client must be asynchronous
 	    
 	    par_enc : function(k, par, cb) {
 		var url_ext = 'par_enc?k=' + k + '&par=' + B64.encode(par);
+        console.log('par ' + par);
+        document.debug_B64 = B64;
+        console.log('urlext in b64 ' + url_ext);
 		send_request(url_ext, cb);
 	    },
 

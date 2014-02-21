@@ -59,10 +59,12 @@ B64.encode = function(str){
             done = true;
         }
         lineCount += 4;
-        if (lineCount >= 76){
+        //commented out by Jonas
+        //we're not sending smtp e-mail here, or are we?
+        /*if (lineCount >= 76){
             result += ('\n');
             lineCount = 0;
-        }
+        }*/
     }
     return result;
 }
