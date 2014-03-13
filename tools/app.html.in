@@ -4,7 +4,8 @@
 {{#each stylesheets}}  <link rel="stylesheet" href="##ROOT_URL_PATH_PREFIX##{{this}}">
 {{/each}}
 
-##RUNTIME_CONFIG##
+<script type='text/javascript'>__meteor_runtime_config__ = {"ROOT_URL":"https://localhost","ROOT_URL_PATH_PREFIX":""};</script>
+<!-- ##RUNTIME_CONFIG## -->
 
 {{#each scripts}}  <script type="text/javascript" src="##ROOT_URL_PATH_PREFIX##{{this}}"></script>
 {{/each}}

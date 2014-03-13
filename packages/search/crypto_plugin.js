@@ -33,7 +33,7 @@ setup_crypto = function(){
 	return;
     }
   
-    console.log("creating document");
+    //console.log("creating document");
     var fire_div = document.createElement('div');
     fire_div.id = "_cryptoFIREWrapper";
     
@@ -251,9 +251,9 @@ MylarCrypto.paragraph_encrypt = function(k, ptext, cb) {
     var callback = function(ciph) {
 	// ciph should be a string formed of b64 encoded
 	// strings split by space
-	console.log("this is ciph " + ciph);
+	//console.log("this is ciph " + ciph);
 	var ciph_list = split_by_space(ciph);
-	console.log("After splitting by space " + JSON.stringify(ciph_list));
+	//console.log("After splitting by space " + JSON.stringify(ciph_list));
 	var encitems = [];
 
 	// hash with randomness

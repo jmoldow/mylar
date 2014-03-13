@@ -345,7 +345,10 @@ var runWebAppServer = function () {
 
     var request = WebApp.categorizeRequest(req);
 
-    res.writeHead(200, {'Content-Type': 'text/html; charset=utf-8'});
+    res.writeHead(200, {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Mylar-Signature':clientJson.mylar_signature
+    });
 
     var requestSpecificHtml = htmlAttributes(boilerplateHtml, request);
     res.write(requestSpecificHtml);
@@ -403,19 +406,24 @@ var runWebAppServer = function () {
 
     // Include __meteor_runtime_config__ in the app html, as an inline script if
     // it's not forbidden by CSP.
-    var browserPolicyPackage = Package["browser-policy-common"];
-    if (! browserPolicyPackage ||
-        ! browserPolicyPackage.BrowserPolicy.content ||
-        browserPolicyPackage.BrowserPolicy.content.inlineScriptsAllowed()) {
-      boilerplateHtml = boilerplateHtml.replace(
-          /##RUNTIME_CONFIG##/,
-        "<script type='text/javascript'>__meteor_runtime_config__ = " +
-          JSON.stringify(__meteor_runtime_config__) + ";</script>");
-    } else {
-      boilerplateHtml = boilerplateHtml.replace(
-        /##RUNTIME_CONFIG##/,
-        "<script type='text/javascript' src='##ROOT_URL_PATH_PREFIX##/meteor_runtime_config.js'></script>"
-      );
+    
+    // If active attacker is turned on, bypass this because no dynamic content is allowed.
+    var activeAttackerPackage = Package["active-attacker"];
+    if (!activeAttackerPackage || !activeAttackerPackage.MYLAR_ACTIVE_ATTACKER){
+        var browserPolicyPackage = Package["browser-policy-common"];
+        if (! browserPolicyPackage ||
+            ! browserPolicyPackage.BrowserPolicy.content ||
+            browserPolicyPackage.BrowserPolicy.content.inlineScriptsAllowed()) {
+          boilerplateHtml = boilerplateHtml.replace(
+              /<!-- ##RUNTIME_CONFIG## -->/,
+            "<script type='text/javascript'>__meteor_runtime_config__ = " +
+              JSON.stringify(__meteor_runtime_config__) + ";</script>");
+        } else {
+          boilerplateHtml = boilerplateHtml.replace(
+            /<!-- ##RUNTIME_CONFIG## -->/,
+            "<script type='text/javascript' src='##ROOT_URL_PATH_PREFIX##/meteor_runtime_config.js'></script>"
+          );
+        }
     }
     boilerplateHtml = boilerplateHtml.replace(
         /##ROOT_URL_PATH_PREFIX##/g,

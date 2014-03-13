@@ -238,7 +238,7 @@ Meteor.Collection.prototype.publish_search_filter = function(pubname, filter, pr
 				console.log("\n\n docproj is " + JSON.stringify(docproj));
 			      self.added(self_col._name, doc._id, docproj);
 			      found = true;
-			      console.log("matched " + JSON.stringify(enctext));
+			      //console.log("matched " + JSON.stringify(enctext));
 			      return true;
 			    }
 			  });

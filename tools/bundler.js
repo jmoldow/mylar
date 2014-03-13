@@ -172,6 +172,9 @@ var Fiber = require('fibers');
 var Future = require(path.join('fibers', 'future'));
 var sourcemap = require('source-map');
 
+//For Mylar
+var sjcl = require('./sjcl.js');
+
 // files to ignore when bundling. node has no globs, so use regexps
 var ignoreFiles = [
     /~$/, /^\.#/, /^#.*#$/,
@@ -198,6 +201,60 @@ var stripLeadingSlash = function (p) {
     throw new Error("bad path: " + p);
   return p.slice(1);
 };
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Functions for Mylar signatures
+///////////////////////////////////////////////////////////////////////////////
+
+
+
+var deserialize_private = function (ser, system) {
+                var c = sjcl.ecc.curves['c192'];
+                var exp = sjcl.bn.fromBits(
+                    sjcl.codec.hex.toBits(ser)
+                );
+                return new sjcl.ecc[system].secretKey(c, exp);
+            }
+
+var mylar_sign = function (contents,filename,uri_filename) {
+    //var serialized_private = "000000c12004626b9660b82694210edda6593c9894a99351d3b30d";   
+    var serialized_private = process.env.DEVELOPER_PK;
+
+    //XXX: just for testing convenience, should not be in production code!
+    if(typeof serialized_private == "undefined")
+        serialized_private = "000000c12004626b9660b82694210edda6593c9894a99351d3b30d";   
+
+    //var serialized_public = "1bd7cee0c382ccebc599cd46f903dc849b392a0cb0de1aa26831c4d0c52d4e48f6689917b6e09ae6697f7618b52e5bd3"; //doesn't need to be here...
+
+    var sec = deserialize_private(serialized_private,"ecdsa");
+
+    var mime = require('mime');
+    //infer content type to sign header
+    contentType = mime.lookup(filename);
+    //XXX: not sure if correct for img
+    charset = mime.charsets.lookup(contentType, 'UTF-8'); 
+    //console.log(charset + " charset");
+    contentTypeMatch = /*options.contentTypeMatch ||*/ /text|javascript|json/
+    if(contentTypeMatch.test(contentType)){
+      contentType = contentType + (charset ? '; charset=' + charset : '');
+    }
+    //console.log(filename + " has content type: " + contentType);
+ 
+    var hash = Builder.sha1(contents); //hash twice because content might not be utf8
+    //console.log("uri_filename is " + uri_filename);
+    var hash2 = Builder.sha1(contentType+':'+hash+':'+uri_filename);
+    //var hash = sjcl.hash.sha256.hash(contents);
+    //hash = sjcl.codec.hex.fromBits(hash)
+    //console.log(filename + " has hashes " + hash + " and " + hash2);
+    var paranoia = 0; //XXX: is this unsafe or an unnecessary argument in sjcl?
+                      // we don't need randomness for a deterministic calculation, right?
+    var sig = sjcl.codec.hex.fromBits(sec.sign(hash2,paranoia));
+    return sig;
+  //var sk = 0; //super secret key!!! don't give this to anyone ;-)
+  //var hash = sjcl.hash.sha256.hash(msg);
+  //return sk.sign(hash);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -271,6 +328,11 @@ var File = function (options) {
 
   self._contents = options.data || null; // contents, if known, as a Buffer
   self._hash = null; // hash, if known, as a hex string
+
+  
+   //Cryptographic signature to be sent along in server header for Mylar
+   //self._mylar_signature = null;
+
 };
 
 _.extend(File.prototype, {
@@ -280,6 +342,16 @@ _.extend(File.prototype, {
       self._hash = Builder.sha1(self.contents());
     return self._hash;
   },
+
+  /*
+  mylar_signature: function () {
+    var self = this;
+    if (! self._mylar_signature)
+      self._mylar_signature = sjcl.sign(self.contents());
+    return self._mylar_signature;
+  },
+  */
+
 
   // Omit encoding to get a buffer, or provide something like 'utf8'
   // to get a string
@@ -871,7 +943,8 @@ _.extend(ClientTarget.prototype, {
     builder.writeJson('program.json', {
       format: "browser-program-pre1",
       page: 'app.html',
-      manifest: manifest
+      manifest: manifest,
+      mylar_signature: mylar_sign(htmlBoilerplate,'app.html','')
     });
     return "program.json";
   }
