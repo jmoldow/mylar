@@ -119,7 +119,7 @@ var htmlAttributes = function (template, request) {
     if (attribute !== null && attribute !== undefined && attribute !== '')
       attributes += ' ' + attribute;
   });
-  return template.replace('##HTML_ATTRIBUTES##', attributes);
+  return template.replace('<html>', '<html'+attributes+'>');
 };
 WebApp.addHtmlAttributeHook = function (hook) {
   htmlAttributeHooks.push(hook);
@@ -346,11 +346,17 @@ var runWebAppServer = function () {
     var request = WebApp.categorizeRequest(req);
 
     res.writeHead(200, {
-        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Type': 'text/html; charset=UTF-8',
         'Mylar-Signature':clientJson.mylar_signature
     });
 
-    var requestSpecificHtml = htmlAttributes(boilerplateHtml, request);
+    //XXX Can't allow rewrite with Mylar active attacker. Question is: what did I break?
+    var activeAttackerPackage = Package["active-attacker"];
+    if (!activeAttackerPackage || !activeAttackerPackage.MYLAR_ACTIVE_ATTACKER){
+        var requestSpecificHtml = htmlAttributes(boilerplateHtml, request);
+    } else {
+        var requestSpecificHtml = boilerplateHtml;
+    }
     res.write(requestSpecificHtml);
     res.end();
     return undefined;
@@ -425,6 +431,7 @@ var runWebAppServer = function () {
           );
         }
     }
+    //XXX Mylar: ROOT_URL_PATH_PREFIX taken out
     boilerplateHtml = boilerplateHtml.replace(
         /##ROOT_URL_PATH_PREFIX##/g,
       __meteor_runtime_config__.ROOT_URL_PATH_PREFIX || "");

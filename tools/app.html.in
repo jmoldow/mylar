@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html##HTML_ATTRIBUTES##>
+<html>
 <head>
-{{#each stylesheets}}  <link rel="stylesheet" href="##ROOT_URL_PATH_PREFIX##{{this}}">
+{{#each stylesheets}}  <link rel="stylesheet" href="{{this}}">
 {{/each}}
 
-<script type='text/javascript'>__meteor_runtime_config__ = {"ROOT_URL":"https://localhost","ROOT_URL_PATH_PREFIX":""};</script>
+<script type='text/javascript'>__meteor_runtime_config__ = {"ROOT_URL":"##ROOT_URL##","DDP_DEFAULT_CONNECTION_URL":"##ROOT_URL##","ROOT_URL_PATH_PREFIX":""};</script>
 <!-- ##RUNTIME_CONFIG## -->
 
-{{#each scripts}}  <script type="text/javascript" src="##ROOT_URL_PATH_PREFIX##{{this}}"></script>
+{{#each scripts}}  <script type="text/javascript" src="{{this}}"></script>
 {{/each}}
 
 {{{head_extra}}}

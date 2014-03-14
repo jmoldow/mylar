@@ -416,6 +416,10 @@ CopyTracingListener.prototype =
       return true;
     } catch (anError) {
       dump("signature not valid for " + uri_filename + "\n");
+      dump("signature: " + sig + "\n");
+      dump("uri_filename: " + uri_filename + "\n");
+      dump("contentType: " + contentType + "\n");
+      dump("hash: " + hash2 + "\n");
       return false;
     }
     return false;

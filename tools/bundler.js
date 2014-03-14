@@ -247,9 +247,13 @@ var mylar_sign = function (contents,filename,uri_filename) {
     //var hash = sjcl.hash.sha256.hash(contents);
     //hash = sjcl.codec.hex.fromBits(hash)
     //console.log(filename + " has hashes " + hash + " and " + hash2);
+    console.log("hash for " + filename + ": " + hash2);
     var paranoia = 0; //XXX: is this unsafe or an unnecessary argument in sjcl?
                       // we don't need randomness for a deterministic calculation, right?
     var sig = sjcl.codec.hex.fromBits(sec.sign(hash2,paranoia));
+    console.log("sig for " + filename + ": " + sig);
+    console.log("content type " + contentType);
+    console.log("uri_filename " + uri_filename);
     return sig;
   //var sk = 0; //super secret key!!! don't give this to anyone ;-)
   //var hash = sjcl.hash.sha256.hash(msg);
@@ -339,7 +343,7 @@ _.extend(File.prototype, {
   hash: function () {
     var self = this;
     if (! self._hash)
-      self._hash = Builder.sha1(self.contents());
+      self._hash = Builder.sha1(self.contents('utf8'));
     return self._hash;
   },
 
@@ -388,7 +392,7 @@ _.extend(File.prototype, {
   // contents.
   setUrlToHash: function (suffix) {
     var self = this;
-    self.url = "/" + self.hash() + suffix;
+    self.url = (process.env.ROOT_URL || "") + "/" + self.hash() + suffix + "?mylor_hash=" + self.hash();
     self.cacheable = true;
     self.targetPath = self.hash() + suffix;
   },
@@ -402,7 +406,7 @@ _.extend(File.prototype, {
       return; // eg, already got setUrlToHash
     if (/\?/.test(self.url))
       throw new Error("URL already has a query string");
-    self.url += "?" + self.hash();
+    self.url = (process.env.ROOT_URL || "")+ self.url + "?mylur_hash=" + self.hash();
     self.cacheable = true;
   },
 
@@ -843,8 +847,10 @@ _.extend(ClientTarget.prototype, {
 
     var templatePath = path.join(__dirname, "app.html.in");
     var template = watch.readAndWatchFile(self.watchSet, templatePath);
+    //TODO: just a quick fix to avoid Mylar extension blocking wss
+    template = template.toString().replace(/##ROOT_URL##/g,(process.env.ROOT_URL || "http://localhost:3000"))
 
-    var f = require('handlebars').compile(template.toString());
+    var f = require('handlebars').compile(template);
     return new Buffer(f({
       scripts: _.pluck(self.js, 'url'),
       stylesheets: _.pluck(self.css, 'url'),
@@ -932,12 +938,15 @@ _.extend(ClientTarget.prototype, {
     // HTML boilerplate (the HTML served to make the client load the
     // JS and CSS files and start the app)
     var htmlBoilerplate = self.generateHtmlBoilerplate();
+    //TODO: just a quick fix to get root url corrected
+
     builder.write('app.html', { data: htmlBoilerplate });
     manifest.push({
       path: 'app.html',
       where: 'internal',
       hash: Builder.sha1(htmlBoilerplate)
     });
+
 
     // Control file
     builder.writeJson('program.json', {
