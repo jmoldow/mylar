@@ -351,7 +351,7 @@ CopyTracingListener.prototype =
       //check for hash if present:
       var prehash = CFN.checkForHash(uri);
       if(prehash && prehash !== hashed){
-          dump('content failed hash check\n');
+          dump('content failed hash check' + request.originalURI.spec + '\n');
           dump('expected: ' + prehash + ' actual: ' + hashed + "\n");
           this.emitFakeResponse(request,context,statusCode,uri);
           return;

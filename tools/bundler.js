@@ -247,13 +247,11 @@ var mylar_sign = function (contents,filename,uri_filename) {
     //var hash = sjcl.hash.sha256.hash(contents);
     //hash = sjcl.codec.hex.fromBits(hash)
     //console.log(filename + " has hashes " + hash + " and " + hash2);
-    console.log("hash for " + filename + ": " + hash2);
+    console.log("Mylar hash for " + filename + ": " + hash2);
     var paranoia = 0; //XXX: is this unsafe or an unnecessary argument in sjcl?
                       // we don't need randomness for a deterministic calculation, right?
     var sig = sjcl.codec.hex.fromBits(sec.sign(hash2,paranoia));
-    console.log("sig for " + filename + ": " + sig);
-    console.log("content type " + contentType);
-    console.log("uri_filename " + uri_filename);
+    console.log("Mylar sig for " + filename + ": " + sig);
     return sig;
   //var sk = 0; //super secret key!!! don't give this to anyone ;-)
   //var hash = sjcl.hash.sha256.hash(msg);
@@ -343,7 +341,7 @@ _.extend(File.prototype, {
   hash: function () {
     var self = this;
     if (! self._hash)
-      self._hash = Builder.sha1(self.contents('utf8'));
+      self._hash = Builder.sha1(self.contents());
     return self._hash;
   },
 
@@ -355,6 +353,18 @@ _.extend(File.prototype, {
     return self._mylar_signature;
   },
   */
+
+  addMylarHash: function() {
+    var self = this;
+    var url = self.url.split('?')[0];
+    self.url = (process.env.ROOT_URL || "")+ url + "?mylar_hash=" + self.hash();
+    /*if( self.url.indexOf('geojson') >= 0){
+        console.log('----');
+        console.log(self.contents('utf8'));
+        console.log('----');
+        console.log(self.url);
+    }*/
+  },
 
 
   // Omit encoding to get a buffer, or provide something like 'utf8'
@@ -392,7 +402,7 @@ _.extend(File.prototype, {
   // contents.
   setUrlToHash: function (suffix) {
     var self = this;
-    self.url = (process.env.ROOT_URL || "") + "/" + self.hash() + suffix + "?mylor_hash=" + self.hash();
+    self.url = "/" + self.hash() + suffix;
     self.cacheable = true;
     self.targetPath = self.hash() + suffix;
   },
@@ -406,7 +416,7 @@ _.extend(File.prototype, {
       return; // eg, already got setUrlToHash
     if (/\?/.test(self.url))
       throw new Error("URL already has a query string");
-    self.url = (process.env.ROOT_URL || "")+ self.url + "?mylur_hash=" + self.hash();
+    self.url = self.url + "?" + self.hash();
     self.cacheable = true;
   },
 
@@ -922,6 +932,10 @@ _.extend(ClientTarget.prototype, {
           file.contents(),
           new Buffer("\n//# sourceMappingURL=" + sourceMapBaseName + "\n")
         ]));
+
+        //file contents won't change any more, let's compute mylar hash
+        
+
         manifestItem.sourceMapUrl = require('url').resolve(
           file.url, sourceMapBaseName);
       }
@@ -931,6 +945,11 @@ _.extend(ClientTarget.prototype, {
       manifestItem.hash = file.hash();
 
       writeFile(file, builder);
+
+      if(process.env.ROOT_URL){
+            file.addMylarHash();
+      }
+      
 
       manifest.push(manifestItem);
     });
