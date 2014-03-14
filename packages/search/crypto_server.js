@@ -130,9 +130,9 @@ if (Meteor.isClient) { // client must be asynchronous
 	    
 	    par_enc : function(k, par, cb) {
 		var url_ext = 'par_enc?k=' + k + '&par=' + B64.encode(par);
-        console.log('par ' + par);
+        //console.log('par ' + par);
         document.debug_B64 = B64;
-        console.log('urlext in b64 ' + url_ext);
+        //console.log('urlext in b64 ' + url_ext);
 		send_request(url_ext, cb);
 	    },
 
