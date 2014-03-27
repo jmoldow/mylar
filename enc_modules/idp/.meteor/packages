@@ -7,6 +7,6 @@ preserve-inputs
 accounts-base
 accounts-ui
 accounts-password
-basic_crypto
 http
-idp-provider
+basic-crypto
+livedata

@@ -1,4 +1,6 @@
-idp-provider
 amplify
-basic_crypto
 bootstrap
+basic-crypto
+accounts-idp
+livedata
+standard-app-packages
