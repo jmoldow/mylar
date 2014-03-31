@@ -1,7 +1,7 @@
 /* Interface to crypto server. Synchronous. */
 
 crypto_server = undefined;
-var base_url = 'http://localhost:8082/';
+var base_url = 'https://localhost:8443/';
 
 if (Meteor.isServer) { // server is synchronous
     crypto_server = (function () {
