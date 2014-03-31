@@ -4,7 +4,7 @@
 {{#each stylesheets}}  <link rel="stylesheet" href="{{this}}">
 {{/each}}
 
-<script type='text/javascript'>__meteor_runtime_config__ = {"ROOT_URL":"##ROOT_URL##","DDP_DEFAULT_CONNECTION_URL":"##ROOT_URL##","ROOT_URL_PATH_PREFIX":""};</script>
+<script type='text/javascript'>__meteor_runtime_config__ = {"ROOT_URL":"##ROOT_URL##","DDP_DEFAULT_CONNECTION_URL":"##ROOT_URL##","ROOT_URL_PATH_PREFIX":"", accountsConfigCalled:true};</script>
 <!-- ##RUNTIME_CONFIG## -->
 
 {{#each scripts}}  <script type="text/javascript" src="{{this}}"></script>
